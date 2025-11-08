@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 from openaq import OpenAQ
 from pandas import json_normalize
 
-# Cargar variables de entorno
 load_dotenv()
 
 # Configurar logging
@@ -22,19 +21,14 @@ CITIES = {
     'London': {'lat': 51.5074, 'lon': -0.1278, 'country': 'GB'}
 }
 
-# NUEVO: Configuración de años a descargar
+# Años a descargar
 YEARS_TO_DOWNLOAD = [2020, 2021, 2022, 2023, 2024]  # 5 años de datos
 
 def download_openaq_historical_data():
     """
-    Descarga datos históricos usando el SDK oficial de OpenAQ v3 - MÚLTIPLES AÑOS
+    Descarga datos históricos usando el SDK oficial de OpenAQ v3
     """
-    print("="*60)
-    print("DESCARGANDO DATOS HISTÓRICOS REALES DE CALIDAD DEL AIRE")
-    print(f"Fuente: OpenAQ API v3 (SDK Oficial)")
-    print(f"Años objetivo: {YEARS_TO_DOWNLOAD}")
-    print("="*60)
-    
+
     api_key = os.getenv('OPENAQ_API_KEY')
     if not api_key:
         logger.error("OPENAQ_API_KEY no encontrada")
@@ -259,10 +253,9 @@ def process_sensor_measurement(measurement_dict, sensor, city_name):
     Procesa una medición de sensor específico
     """
     try:
-        # Extraer fecha de la estructura correcta
+        # Extraer fecha de la estructura
         datetime_utc = None
         
-        # La fecha está en period.datetime_from.utc
         if 'period' in measurement_dict:
             period = measurement_dict['period']
             if 'datetime_from' in period and 'utc' in period['datetime_from']:
@@ -290,7 +283,7 @@ def process_sensor_measurement(measurement_dict, sensor, city_name):
         if not datetime_utc:
             return None
         
-        # Asegurar formato de fecha
+        
         if isinstance(datetime_utc, str):
             date_part = datetime_utc.split('T')[0]
         else:
@@ -357,7 +350,7 @@ def save_historical_data(df):
     
     # Guardar datos
     os.makedirs('data/raw', exist_ok=True)
-    output_path = 'data/raw/air_quality_data_2020_2024.csv'  # Nuevo nombre
+    output_path = 'data/raw/air_quality_data_2020_2024.csv'
     daily_avg.to_csv(output_path, index=False)
     
     print_data_report(daily_avg, output_path)
@@ -422,4 +415,4 @@ if __name__ == "__main__":
     except KeyboardInterrupt:
         logger.info("Descarga cancelada")
     except Exception as e:
-        logger.error(f"Error inesperado: {e}")
+        logger.error(f"Error {e}")
